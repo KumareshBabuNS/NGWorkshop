@@ -32,6 +32,13 @@
 		<level value="info" />
 	</logger>
 
+    <logger name="org.springframework.transaction">
+        <level value="info" />
+    </logger>
+    <logger name="org.springframework.data">
+        <level value="info" />
+    </logger>
+
 	<!-- Root Logger -->
 	<root>
 		<priority value="warn" />

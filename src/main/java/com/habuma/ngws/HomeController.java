@@ -1,15 +1,17 @@
 package com.habuma.ngws;
 
-import java.text.DateFormat;
-import java.util.Date;
-import java.util.Locale;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.habuma.ngws.appearance.AppearanceController;
+import com.habuma.ngws.citizen.CitizenController;
+import com.habuma.ngws.location.LocationController;
 
 /**
  * Handles requests for the application home page.
@@ -17,23 +19,28 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Controller
 public class HomeController {
 	
-	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
+	private CitizenLoader loader;
 	
-	/**
-	 * Simply selects the home view to render by returning its name.
-	 */
-	@RequestMapping(value = "/", method = RequestMethod.GET)
-	public String home(Locale locale, Model model) {
-		logger.info("Welcome home! the client locale is "+ locale.toString());
-		
-		Date date = new Date();
-		DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, locale);
-		
-		String formattedDate = dateFormat.format(date);
-		
-		model.addAttribute("serverTime", formattedDate );
-		
-		return "home";
+	@Inject
+	public HomeController(CitizenLoader loader) {
+		this.loader = loader;
 	}
 	
+	@RequestMapping(value = "/", method = RequestMethod.GET)
+	public @ResponseBody StartPointResource home() {
+		StartPointResource resource = new StartPointResource();
+		resource.add(linkTo(HomeController.class).withRel("startpoint"));
+		resource.add(linkTo(CitizenController.class).withRel("citizens"));
+		resource.add(linkTo(AppearanceController.class).withRel("appearances"));
+		resource.add(linkTo(LocationController.class).withRel("locations"));
+		return resource;
+	}
+	
+	
+	@RequestMapping(value="/load", method=RequestMethod.GET)
+	public @ResponseBody String load() {
+		loader.loadData();
+		return "ok";
+	}
+
 }
